@@ -13,6 +13,18 @@ enum Role {
   STAFF
 }
 
+enum WorkshopStatus {
+  DRAFT      // not visible for registration yet
+  OPEN       // accepting registrations
+  CANCELLED
+  COMPLETED
+}
+
+enum RegistrationStatus {
+  ACTIVE
+  CANCELLED
+}
+
 model User {
   id            String    @id
   name          String
@@ -24,6 +36,10 @@ model User {
   updatedAt     DateTime  @updatedAt
   sessions      Session[]
   accounts      Account[]
+
+  workshopsCreated       Workshop[]     @relation("WorkshopCreatedBy")
+  registrationsMade      Registration[] @relation("RegisteredBy")
+  registrationsCancelled Registration[] @relation("CancelledBy")
 
   @@map("user")
 }
@@ -75,3 +91,47 @@ model Verification {
   @@map("verification")
 }
 
+
+model Workshop {
+  id          String         @id @default(cuid())
+  code        String         @unique
+  title       String
+  instructor  String
+  description String?
+  location    String
+  startsAt    DateTime
+  endsAt      DateTime?
+  capacity    Int
+  status      WorkshopStatus @default(OPEN)
+  createdById String
+  createdBy   User           @relation("WorkshopCreatedBy", fields: [createdById], references: [id])
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  registrations Registration[]
+
+  @@index([startsAt])
+  @@index([status])
+  @@map("workshop")
+}
+
+model Registration {
+  id            String             @id @default(cuid())
+  workshopId    String
+  workshop      Workshop           @relation(fields: [workshopId], references: [id])
+  attendeeName  String
+  attendeeEmail String
+  status        RegistrationStatus @default(ACTIVE)
+
+  registeredById String
+  registeredBy   User     @relation("RegisteredBy", fields: [registeredById], references: [id])
+  registeredAt   DateTime @default(now())
+
+  cancelledById String?
+  cancelledBy   User?     @relation("CancelledBy", fields: [cancelledById], references: [id])
+  cancelledAt   DateTime?
+  cancelReason  String?
+
+  @@index([workshopId, status])
+  @@map("registration")
+}
