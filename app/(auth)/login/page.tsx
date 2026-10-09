@@ -35,7 +35,7 @@ export default function LoginPage() {
       setError("Invalid email or password");
       return;
     }
-    router.push("/workshops");
+    router.push("/");
     router.refresh();
   }
 

@@ -27,6 +27,19 @@ export const auth = betterAuth({
     },
   },
   plugins: [nextCookies()],
+  databaseHooks: {
+    session: {
+      create: {
+        before: async (session) => {
+          const u = await prisma.user.findUnique({
+            where: { id: session.userId },
+            select: { disabled: true },
+          });
+          if (u?.disabled) return false; // refuse to create a session
+        },
+      },
+    },
+  },
 });
 
 export type Session = typeof auth.$Infer.Session;
