@@ -40,3 +40,11 @@ export function route<P = Record<string, never>>(
     }
   };
 }
+
+export async function readJson(req: Request) {
+  try {
+    return await req.json();
+  } catch {
+    throw new ApiError(400, "INVALID_JSON", "Request body must be valid JSON.");
+  }
+}

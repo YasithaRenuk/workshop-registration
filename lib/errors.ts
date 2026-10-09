@@ -7,3 +7,9 @@ export class ApiError extends Error {
     super(message);
   }
 }
+
+export function isUniqueViolation(e: unknown) {
+  return (
+    typeof e === "object" && e !== null && (e as { code?: string }).code === "P2002"
+  );
+}
