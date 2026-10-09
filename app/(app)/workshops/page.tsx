@@ -1,3 +1,5 @@
+export const instant = false;
+
 import Link from "next/link";
 import { Suspense } from "react";
 import type { Role } from "@/generated/prisma/enums";

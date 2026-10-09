@@ -1,3 +1,5 @@
+export const instant = false;
+
 import { notFound, redirect } from "next/navigation";
 import type { Role } from "@/generated/prisma/enums";
 import { WorkshopForm } from "@/components/workshop-form";

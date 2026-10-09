@@ -1,3 +1,5 @@
+export const instant = false;
+
 import { UsersManager } from "@/components/users-manager";
 import { requirePage } from "@/lib/session";
 import { listUsers } from "@/lib/users";

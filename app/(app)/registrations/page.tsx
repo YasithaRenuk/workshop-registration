@@ -1,3 +1,5 @@
+export const instant = false;
+
 import Link from "next/link";
 import type { Role } from "@/generated/prisma/enums";
 import { buttonVariants } from "@/components/ui/button";

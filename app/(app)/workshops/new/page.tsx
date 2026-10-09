@@ -1,3 +1,5 @@
+export const instant = false;
+
 import { WorkshopForm } from "@/components/workshop-form";
 import { requirePage } from "@/lib/session";
 
