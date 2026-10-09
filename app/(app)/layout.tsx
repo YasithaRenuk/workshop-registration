@@ -26,6 +26,9 @@ export default async function AppLayout({
             {can(user.role, "user:manage") && (
               <NavLink href="/users">Users</NavLink>
             )}
+            {can(user.role, "registration:read") && (
+              <NavLink href="/registrations">Registrations</NavLink>
+            )}
           </nav>
           <div className="ml-auto flex items-center gap-3">
             <div className="text-right text-sm leading-tight">

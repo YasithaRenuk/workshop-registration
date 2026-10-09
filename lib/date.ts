@@ -29,3 +29,10 @@ export function presetRange(kind: "today" | "week" | "next7") {
     to: endOfDayISO(toDateInput(end)),
   };
 }
+
+export function toDateTimeLocal(v: string | Date | null | undefined) {
+  if (!v) return "";
+  const d = new Date(v);
+  if (Number.isNaN(d.getTime())) return "";
+  return `${toDateInput(d)}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
