@@ -10,6 +10,9 @@ export async function requirePermission(permission: Permission) {
   if (!session) {
     throw new ApiError(401, "UNAUTHENTICATED", "Please sign in.");
   }
+  if (session.user.disabled) {
+    throw new ApiError(403, "ACCOUNT_DISABLED", "This account has been disabled.");
+  }
   if (!can(session.user.role, permission)) {
     throw new ApiError(403, "FORBIDDEN", "You don't have permission to do this.");
   }

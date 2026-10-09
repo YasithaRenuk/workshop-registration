@@ -32,6 +32,7 @@ model User {
   emailVerified Boolean   @default(false)
   image         String?
   role          Role      @default(STAFF)
+  disabled      Boolean   @default(false)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   sessions      Session[]

@@ -18,6 +18,12 @@ export const auth = betterAuth({
         defaultValue: "STAFF",
         input: false, // clients can never set their own role
       },
+      disabled: {
+        type: "boolean",
+        required: false,
+        defaultValue: false,
+        input: false,
+      },
     },
   },
   plugins: [nextCookies()],

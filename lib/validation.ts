@@ -54,3 +54,43 @@ export const updateWorkshopSchema = base
 
 export type CreateWorkshopInput = z.infer<typeof createWorkshopSchema>;
 export type UpdateWorkshopInput = z.infer<typeof updateWorkshopSchema>;
+
+
+export const registerSchema = z.object({
+  name: z.string().trim().min(1, "Name is required").max(120),
+  email: z.string().trim().toLowerCase().email("Invalid email").max(200),
+});
+
+export const cancelSchema = z.object({
+  reason: z.string().trim().max(500).optional(),
+});
+
+export const registrationListQuery = z.object({
+  status: z.preprocess(emptyToUndefined, z.enum(["ACTIVE", "CANCELLED"]).optional()),
+  q: z.preprocess(emptyToUndefined, z.string().trim().max(100).optional()),
+  page: z.coerce.number().int().min(1).default(1),
+  pageSize: z.coerce.number().int().min(1).max(100).default(50),
+});
+export type RegistrationListQuery = z.infer<typeof registrationListQuery>;
+
+
+const ROLES = ["ADMIN", "MANAGER", "STAFF"] as const;
+
+export const createUserSchema = z.object({
+  name: z.string().trim().min(1).max(120),
+  email: z.string().trim().toLowerCase().email().max(200),
+  password: z.string().min(8, "At least 8 characters").max(128),
+  role: z.enum(ROLES),
+});
+
+export const updateUserSchema = z
+  .object({
+    name: z.string().trim().min(1).max(120).optional(),
+    role: z.enum(ROLES).optional(),
+    disabled: z.boolean().optional(),
+    password: z.string().min(8, "At least 8 characters").max(128).optional(),
+  })
+  .refine((d) => Object.keys(d).length > 0, { message: "Nothing to update" });
+
+export type CreateUserInput = z.infer<typeof createUserSchema>;
+export type UpdateUserInput = z.infer<typeof updateUserSchema>;

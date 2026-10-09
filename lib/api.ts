@@ -48,3 +48,13 @@ export async function readJson(req: Request) {
     throw new ApiError(400, "INVALID_JSON", "Request body must be valid JSON.");
   }
 }
+
+export async function readJsonOrEmpty(req: Request) {
+  const text = await req.text();
+  if (!text.trim()) return {};
+  try {
+    return JSON.parse(text);
+  } catch {
+    throw new ApiError(400, "INVALID_JSON", "Request body must be valid JSON.");
+  }
+}

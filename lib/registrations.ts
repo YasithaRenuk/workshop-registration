@@ -1,5 +1,9 @@
 import { prisma } from "./db";
 import { ApiError } from "./errors";
+import { Prisma } from "./generated/prisma/client";
+import type { Role } from "./generated/prisma/enums";
+import { getWorkshop } from "./workshops";
+import type { RegistrationListQuery } from "./validation";
 
 function isUniqueViolation(e: unknown) {
   return (
@@ -98,4 +102,73 @@ export async function cancelRegistration(input: {
   return prisma.registration.findUniqueOrThrow({
     where: { id: input.registrationId },
   });
+}
+
+const historyInclude = {
+  registeredBy: { select: { id: true, name: true } },
+  cancelledBy: { select: { id: true, name: true } },
+} satisfies Prisma.RegistrationInclude;
+
+// Full history for one workshop active and cancelled with who and when
+export async function listWorkshopRegistrations(
+  workshopId: string,
+  q: RegistrationListQuery,
+  role: Role
+) {
+  // 404s for drafts when the caller isnt Manager
+  const workshop = await getWorkshop(workshopId, role);
+
+  const where: Prisma.RegistrationWhereInput = {
+    workshopId,
+    ...(q.status && { status: q.status }),
+    ...(q.q && {
+      OR: [
+        { attendeeName: { contains: q.q, mode: "insensitive" } },
+        { attendeeEmail: { contains: q.q, mode: "insensitive" } },
+      ],
+    }),
+  };
+
+  const [items, total] = await Promise.all([
+    prisma.registration.findMany({
+      where,
+      include: historyInclude,
+      orderBy: [{ registeredAt: "desc" }, { id: "desc" }],
+      skip: (q.page - 1) * q.pageSize,
+      take: q.pageSize,
+    }),
+    prisma.registration.count({ where }),
+  ]);
+
+  return { workshop, items, total, page: q.page, pageSize: q.pageSize };
+}
+
+// Global history search
+export async function searchRegistrations(q: RegistrationListQuery, role: Role) {
+  const where: Prisma.RegistrationWhereInput = {
+    ...(role !== "MANAGER" && { workshop: { status: { not: "DRAFT" } } }),
+    ...(q.status && { status: q.status }),
+    ...(q.q && {
+      OR: [
+        { attendeeName: { contains: q.q, mode: "insensitive" } },
+        { attendeeEmail: { contains: q.q, mode: "insensitive" } },
+      ],
+    }),
+  };
+
+  const [items, total] = await Promise.all([
+    prisma.registration.findMany({
+      where,
+      include: {
+        ...historyInclude,
+        workshop: { select: { id: true, code: true, title: true, startsAt: true } },
+      },
+      orderBy: [{ registeredAt: "desc" }, { id: "desc" }],
+      skip: (q.page - 1) * q.pageSize,
+      take: q.pageSize,
+    }),
+    prisma.registration.count({ where }),
+  ]);
+
+  return { items, total, page: q.page, pageSize: q.pageSize };
 }
